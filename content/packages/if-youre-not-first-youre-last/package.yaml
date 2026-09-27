@@ -1,0 +1,17 @@
+package_id: pkg_if_youre_not_first_youre_last
+title_en: If You're Not First, You're Last — Original Study Pack
+author: Grant Cardone
+work_discussed: If You're Not First, You're Last (2010)
+language: en
+rights_basis: ORIGINAL
+asset_summary: Original introduction, reading guide, mind map. Cover is page 1 of the user's imported PDF. Book file remains LICENSED.
+includes:
+  - 01-introduction-en.txt
+  - 02-reading-guide-en.txt
+  - 03-mind-map.png
+  - 04-cover.png
+excludes:
+  - sharing or rehosting the imported PDF
+  - sharing the imported PDF or its cover outside this personal folder
+  - quotations from the book
+delivery_folder: if-youre-not-first-youre-last

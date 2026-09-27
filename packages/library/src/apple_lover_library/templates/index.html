@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }}</title>
+  <style>
+    body { font-family: Georgia, "Source Han Serif SC", serif; margin: 2rem auto; max-width: 980px; color: #1b1b1b; background: #f6f1e8; }
+    h1 { font-size: 1.6rem; }
+    section { background: #fffdf8; border: 1px solid #ddd2c0; padding: 1rem 1.2rem; margin: 1rem 0; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 0.4rem 0.3rem; border-bottom: 1px solid #eee6d8; vertical-align: top; }
+    button, input, select { font: inherit; }
+    .muted { color: #666; font-size: 0.9rem; }
+    form.inline { display: inline; }
+    .links a { margin-right: 0.8rem; }
+    input[type=text] { min-width: 12rem; }
+  </style>
+</head>
+<body>
+  <h1>{{ title }}</h1>
+  <p class="muted">界面版本 {{ app_version | default("?") }}。若不是 0.2.3，请先关掉旧窗口，再运行 <code>python -m apple_lover_library serve</code>。</p>
+  <p class="muted">个人英文原版书库。公版可一键下载；当代书只提供 Internet Archive 在线借阅、Google Books 预览、书店购买，以及导入你已经拥有的 EPUB/PDF。不会接入来源不明的下载站。</p>
+
+  <section>
+    <h2>导入已有 EPUB / PDF</h2>
+    <form action="/import" method="post" enctype="multipart/form-data">
+      <p><label>书名 <input name="title" value="{{ q }}" required></label>
+         <label>作者 <input name="author" value="{{ author }}" required></label>
+         <label>权利
+           <select name="rights">
+             <option value="LICENSED">LICENSED 我已拥有</option>
+             <option value="PUBLIC_DOMAIN">PUBLIC_DOMAIN 公版</option>
+           </select>
+         </label>
+         <input type="file" name="file" accept=".epub,.pdf" required>
+         <button type="submit">导入</button></p>
+    </form>
+  </section>
+
+  <section>
+    <h2>查找公版与书目</h2>
+    <form action="/" method="get">
+      <p>
+        <label>书名或关键词 <input type="text" name="q" value="{{ q }}" placeholder="cathedral / pride"></label>
+        <label>作者（可不全） <input type="text" name="author" value="{{ author }}" placeholder="llosa / austen"></label>
+        <label><input type="checkbox" name="ai" value="1" {% if ai %}checked{% endif %}> AI 扩词</label>
+        <button type="submit">搜索</button>
+      </p>
+    </form>
+    <p class="muted">同时查 Gutenberg、Open Library、Google Books、Internet Archive 借阅。外链含书店购买。AI 扩词只猜书名/作者。自用学习也不能从不明来源抓版权书全文。</p>
+    {% if not ai_enabled %}
+    <p class="muted">当前未配置 LLM_API_KEY，AI 扩词不会调用模型。</p>
+    {% endif %}
+
+    {% if ai_candidates %}
+    <p>AI 候选：
+      {% for c in ai_candidates %}
+        <span>{{ c.author }} — {{ c.title }}</span>{% if not loop.last %}；{% endif %}
+      {% endfor %}
+    </p>
+    {% endif %}
+
+    {% if searched %}
+    <p>已查找：<strong>{{ author or "（未填作者）" }}</strong>
+      {% if q %} / 关键词 <strong>{{ q }}</strong>{% endif %}
+      {% if phrase %} · 精确式 <code>{{ phrase }}</code>{% endif %}
+    </p>
+    {% endif %}
+
+    {% if google %}
+    <p class="links">其他查找：
+      {% for link in google %}
+        <a href="{{ link.url }}" target="_blank" rel="noreferrer">{{ link.label }}</a>
+      {% endfor %}
+    </p>
+    {% endif %}
+
+    {% if errors is defined and errors.gutenberg %}<p class="muted">{{ errors.gutenberg }}</p>{% endif %}
+    {% if errors is defined and errors.openlibrary %}<p class="muted">{{ errors.openlibrary }}</p>{% endif %}
+    {% if errors is defined and errors.googlebooks %}<p class="muted">{{ errors.googlebooks }}</p>{% endif %}
+    {% if errors is defined and errors.archive %}<p class="muted">{{ errors.archive }}</p>{% endif %}
+
+    {% if searched and not gutenberg and not errors.gutenberg %}
+    <p>Project Gutenberg：没有可下载的公版结果。当代书请看下面的借阅 / 预览，或购买后用上方表单导入。</p>
+    {% endif %}
+
+    {% if gutenberg %}
+    <h3>Project Gutenberg（可下载公版 EPUB）</h3>
+    <table>
+      <tr><th>作者</th><th>书名</th><th>匹配</th><th></th></tr>
+      {% for hit in gutenberg %}
+      <tr>
+        <td>{{ hit.author }}</td>
+        <td>{{ hit.title }}</td>
+        <td>{{ '%.0f'|format(hit.score * 100) }}%</td>
+        <td>
+          {% if hit.can_download and hit.gutenberg_id %}
+          <form class="inline" action="/download-gutenberg" method="post">
+            <input type="hidden" name="gutenberg_id" value="{{ hit.gutenberg_id }}">
+            <button type="submit">下载到本地</button>
+          </form>
+          {% endif %}
+          {% if hit.page_url %}<a href="{{ hit.page_url }}" target="_blank" rel="noreferrer">页面</a>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+
+    {% if searched and not googlebooks and not errors.googlebooks %}
+    <p class="muted">Google Books：没有匹配书目。</p>
+    {% endif %}
+
+    {% if googlebooks %}
+    <h3>Google Books（预览 / 书目，不可一键下载）</h3>
+    <table>
+      <tr><th>作者</th><th>书名</th><th>获取</th><th>匹配</th><th></th></tr>
+      {% for hit in googlebooks %}
+      <tr>
+        <td>{{ hit.author }}</td>
+        <td>{{ hit.title }}</td>
+        <td>{{ hit.access_label }}</td>
+        <td>{{ '%.0f'|format(hit.score * 100) }}%</td>
+        <td>
+          {% if hit.preview_url %}<a href="{{ hit.preview_url }}" target="_blank" rel="noreferrer">预览</a>{% endif %}
+          {% if hit.page_url %}<a href="{{ hit.page_url }}" target="_blank" rel="noreferrer">Google Books</a>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+
+    {% if searched and not archive and not errors.archive %}
+    <p class="muted">Internet Archive：没有可借阅副本。该书若在版权期内，只能登录 Archive 看是否开放借阅，或购买后导入。</p>
+    {% endif %}
+
+    {% if archive %}
+    <h3>Internet Archive（官方条目；可借阅则登录后在线读）</h3>
+    <table>
+      <tr><th>作者</th><th>书名</th><th>获取</th><th>匹配</th><th></th></tr>
+      {% for hit in archive %}
+      <tr>
+        <td>{{ hit.author }}</td>
+        <td>{{ hit.title }}</td>
+        <td>{{ hit.access_label }}</td>
+        <td>{{ '%.0f'|format(hit.score * 100) }}%</td>
+        <td>
+          {% if hit.borrow_url %}<a href="{{ hit.borrow_url }}" target="_blank" rel="noreferrer">在线借阅</a>{% endif %}
+          {% if hit.page_url %}<a href="{{ hit.page_url }}" target="_blank" rel="noreferrer">Archive 页面</a>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+
+    {% if searched and not openlibrary and not errors.openlibrary %}
+    <p class="muted">Open Library：没有匹配书目。可点上面的「Open Library 站内」或「Google 精确书目」。</p>
+    {% endif %}
+
+    {% if openlibrary %}
+    <h3>Open Library（去重后的书目；公版可下载，当代书看借阅）</h3>
+    <table>
+      <tr><th>作者</th><th>书名</th><th>获取</th><th>匹配</th><th></th></tr>
+      {% for hit in openlibrary %}
+      <tr>
+        <td>{{ hit.author }}</td>
+        <td>{{ hit.title }}</td>
+        <td>{{ hit.access_label }}</td>
+        <td>{{ '%.0f'|format(hit.score * 100) }}%</td>
+        <td>
+          {% if hit.can_download and hit.gutenberg_id %}
+          <form class="inline" action="/download-gutenberg" method="post">
+            <input type="hidden" name="gutenberg_id" value="{{ hit.gutenberg_id }}">
+            <button type="submit">经 Gutenberg 下载</button>
+          </form>
+          {% endif %}
+          {% if hit.borrow_url %}<a href="{{ hit.borrow_url }}" target="_blank" rel="noreferrer">在线借阅</a>{% endif %}
+          {% if hit.page_url %}<a href="{{ hit.page_url }}" target="_blank" rel="noreferrer">Open Library</a>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2>书库</h2>
+    <table>
+      <tr><th>作者</th><th>书名</th><th>权利</th><th>原书</th><th>笔记</th></tr>
+      {% for row in books %}
+      <tr>
+        <td>{{ row.book.author }}</td>
+        <td>{{ row.book.title_en }}{% if row.book.title_zh %} / {{ row.book.title_zh }}{% endif %}</td>
+        <td>{{ row.book.rights_basis }}</td>
+        <td>
+          {% if row.book.file_path %}
+          <form class="inline" action="/open/book/{{ row.book.book_id }}" method="post">
+            <button type="submit">打开原书</button>
+          </form>
+          {% else %}无本地文件{% endif %}
+        </td>
+        <td>
+          {% for note in row.notes %}
+          <form class="inline" action="/open/note/{{ note.note_id }}" method="post">
+            <button type="submit">{{ note.title }}</button>
+          </form>
+          {% else %}—{% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+</body>
+</html>

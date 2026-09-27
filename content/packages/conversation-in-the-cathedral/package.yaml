@@ -1,0 +1,29 @@
+package_id: pkg_conversation_in_the_cathedral
+title_en: Conversation in the Cathedral — Original Study Pack
+title_zh: 《酒吧长谈》原创导读资料包
+author: Mario Vargas Llosa
+work_discussed: Conversation in the Cathedral (Conversación en La Catedral, 1969)
+edition: study-pack-v1
+language: en
+rights_basis: ORIGINAL
+rights_status: PENDING
+rights_region: CN
+rights_channel: XIANYU
+asset_version: v1
+asset_summary: 原创英文导读 + 阅读指南 + 思维导图（不含原书）
+price_cents: 880
+status: DRAFT
+link_healthy: true
+share:
+  stored_in: secrets/packages/conversation-in-the-cathedral.delivery.yaml
+  masked_url: "https://…Iq8A"
+  masked_code: "****"
+  fingerprint: 29c4bec14beb9746
+includes:
+  - 01-introduction-en.txt
+  - 02-reading-guide-en.txt
+  - 03-mind-map.png
+excludes:
+  - novel PDF/EPUB
+  - scan or photocopy of any edition
+delivery_folder: conversation-in-the-cathedral

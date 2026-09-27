@@ -1,0 +1,1 @@
+闲鱼 API 已停用。书库逻辑在 `packages/library`。
