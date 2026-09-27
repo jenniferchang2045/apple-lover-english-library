@@ -15,6 +15,7 @@ dependencies = [
   "python-multipart>=0.0.9",
   "uvicorn>=0.30",
   "pypdfium2>=4.30",
+  "pillow>=11.0",
 ]
 
 [project.optional-dependencies]
@@ -22,6 +23,7 @@ dev = [
   "pytest>=8.3",
   "pytest-cov>=5.0",
   "ruff>=0.6",
+  "pypdf>=5.0",
 ]
 
 [project.scripts]

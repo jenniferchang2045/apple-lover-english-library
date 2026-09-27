@@ -1,56 +1,36 @@
 {
   "book": "If You're Not First, You're Last",
   "author": "Grant Cardone",
-  "renderer": "packages/library/src/apple_lover_library/render_mindmap.py",
+  "content_source": "01-introduction-en.txt",
   "output": "03-mind-map.png",
-  "canvas": [2200, 1400],
-  "verify": {
-    "every_label_has_spaces": true,
-    "no_smashed_words": true,
-    "original_notes_only": true
-  },
+  "canvas": [1536, 1024],
+  "center": "If You're Not First, You're Last",
   "branches": [
     {
-      "title": "1  Market position",
-      "children": [
-        "Who already thinks of you first?",
-        "What slot are you occupying?"
-      ]
+      "title": "Market position",
+      "children": ["Buyer's first thought", "Win the order", "Own a clear slot"]
     },
     {
-      "title": "2  Countable activity",
-      "children": [
-        "Calls, meetings, follow-ups — count them.",
-        "Cut work that only soothes you."
-      ]
+      "title": "Downturn",
+      "children": ["Buyers delay", "Competitors retreat", "Move into open space"]
     },
     {
-      "title": "3  Named competitors",
-      "children": [
-        "Include \"the buyer waits.\"",
-        "What do they do more often than you?"
-      ]
+      "title": "Useful activity",
+      "children": ["More conversations", "More offers", "More visibility"]
     },
     {
-      "title": "4  Downturn behavior",
-      "children": [
-        "Do not shrink with the market.",
-        "Move into space others leave."
-      ]
+      "title": "Competition",
+      "children": ["Name the rival", "Include doing nothing", "Find the neglected account"]
     },
     {
-      "title": "5  Price and fear",
-      "children": [
-        "Discount is often panic, not strategy.",
-        "What feeling are you trying to stop?"
-      ]
+      "title": "Avoid price panic",
+      "children": ["Do not discount from fear", "Make value visible"]
     },
     {
-      "title": "6  Daily scoreboard",
-      "children": [
-        "One number you cannot lie about.",
-        "Review it before you stop for the day."
-      ]
+      "title": "Study to action",
+      "children": ["Define first in my market", "Act within 48 hours", "Count one metric"]
     }
-  ]
+  ],
+  "footer": "Rule → My market → Action → Count",
+  "note": "Original companion map based on the introduction; not a reproduction of book pages."
 }

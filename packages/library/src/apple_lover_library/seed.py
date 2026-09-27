@@ -5,7 +5,6 @@ from pathlib import Path
 
 from apple_lover_library.enums import BookSource, NoteKind, RightsBasis
 from apple_lover_library.extract_cover import extract_pdf_cover
-from apple_lover_library.render_mindmap import render_cardone_mindmap
 from apple_lover_library.ids import new_id, safe_name
 from apple_lover_library.models import Book, CompanionNote
 from apple_lover_library.paths import LIBRARY_NOTES, ROOT, ensure_dirs
@@ -33,7 +32,7 @@ def seed_companion_notes(db_path: Path | None = None) -> Book | None:
 
 
 def _seed_cathedral(db_path: Path | None = None) -> Book | None:
-    """Catalog Conversation in the Cathedral as UNKNOWN + original notes. Never copies the novel PDF."""
+    """Catalog Cathedral as UNKNOWN with original notes, without copying the novel PDF."""
     with connect(db_path) as conn:
         for book in list_books(conn):
             if book.slug == CATHEDRAL_SLUG:
@@ -97,7 +96,7 @@ def _seed_cathedral(db_path: Path | None = None) -> Book | None:
 
 
 def attach_imported_cardone_pack(db_path: Path | None = None) -> Book | None:
-    """Put original notes in the same folder as the imported PDF, then extract the book cover. Force LICENSED."""
+    """Put original notes beside the imported PDF, extract its cover, and mark it LICENSED."""
     if not SOURCE_CARDONE.is_dir():
         return None
     with connect(db_path) as conn:
@@ -117,7 +116,6 @@ def attach_imported_cardone_pack(db_path: Path | None = None) -> Book | None:
         book.rights_basis = RightsBasis.LICENSED
         upsert_book(conn, book)
 
-        render_cardone_mindmap(SOURCE_CARDONE / "03-mind-map.png")
         existing_kinds = {note.kind for note in notes_for(conn, book.book_id)}
         for name, title, kind in CARDONE_PACK:
             src = SOURCE_CARDONE / name

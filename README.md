@@ -25,14 +25,11 @@ python -m apple_lover_library serve
 
 ## Mind map（Grant Cardone study pack）
 
-渲染代码：`packages/library/src/apple_lover_library/render_mindmap.py`  
-示例数据：`content/packages/if-youre-not-first-youre-last/mindmap-sample.json`  
-当前输出：`content/packages/if-youre-not-first-youre-last/03-mind-map.png`
+成品图片：`content/packages/if-youre-not-first-youre-last/03-mind-map.png`
 
-```powershell
-python -c "from apple_lover_library.render_mindmap import render_cardone_mindmap; from pathlib import Path; render_cardone_mindmap(Path('content/packages/if-youre-not-first-youre-last/03-mind-map.png'))"
-pytest tests/unit/test_library_seed.py -q
-```
+文字提纲：`content/packages/if-youre-not-first-youre-last/mindmap-sample.json`
+
+思维导图按 `01-introduction-en.txt` 的内容重新设计，为静态图片。导入该书时会将图片复制到书籍目录，不会重新渲染覆盖。日后修改图中的文字，需要重新制作图片并同步更新提纲。
 
 导入的版权书 PDF 在 `library/books/`，不会进 Git。`.env`、`secrets/`、`node_modules/` 也不会进 Git。
 

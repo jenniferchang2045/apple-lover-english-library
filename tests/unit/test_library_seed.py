@@ -90,24 +90,21 @@ def test_cardone_notes_sit_with_imported_pdf(tmp_path: Path, monkeypatch: pytest
     assert "If-Youre-Not-First-Youre-Last.pdf" in names
     assert "01-introduction-en.txt" in names
     assert "03-mind-map.png" in names
+    assert (pack_dir / "03-mind-map.png").read_bytes() == (src / "03-mind-map.png").read_bytes()
     assert "04-cover.png" in names
     with connect(db) as conn:
         kinds = {note.kind.value for note in notes_for(conn, attached.book_id)}
     assert kinds >= {"INTRO", "GUIDE", "MINDMAP", "COVER"}
 
 
-def test_cardone_mindmap_has_spaced_english(tmp_path: Path) -> None:
-    from apple_lover_library.render_mindmap import BRANCHES, render_cardone_mindmap
+def test_cardone_mindmap_artwork_is_valid() -> None:
+    from PIL import Image
 
-    for title, children, _origin in BRANCHES:
-        assert " " in title
-        assert all(" " in line for line in children)
+    from apple_lover_library.seed import SOURCE_CARDONE
 
-    dest = tmp_path / "03-mind-map.png"
-    render_cardone_mindmap(dest)
-    assert dest.stat().st_size > 40_000
-    raw = dest.read_bytes()
-    assert raw[:8] == b"\x89PNG\r\n\x1a\n"
+    with Image.open(SOURCE_CARDONE / "03-mind-map.png") as image:
+        assert image.format == "PNG"
+        assert image.size == (1536, 1024)
 
 
 def test_extract_pdf_cover_renders_first_page(tmp_path: Path) -> None:
